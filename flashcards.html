@@ -134,8 +134,57 @@
 
         <div id="ratingBtns" class="fc-rating-btns" hidden>
           <button class="fc-rating-btn fc-rating-btn--again" data-q="1">Again</button>
-          <button class="fc-rating-btn fc-rating-btn--good"  data-q="4">Good</button>
-          <button class="fc-rating-btn fc-rating-btn--easy"  data-q="5">Easy</button>
+          <button class="fc-rating-btn fc-rating-btn--hard"  data-q="2">Hard</button>
+          <button class="fc-rating-btn fc-rating-btn--good"  data-q="3">Good</button>
+          <button class="fc-rating-btn fc-rating-btn--easy"  data-q="4">Easy</button>
+        </div>
+      </div>
+
+      <!-- ── Block summary (study done → recall check) ── -->
+      <div id="screenBlockSummary" class="fc-screen">
+        <div class="fc-intro">
+          <i class="fc-intro-icon">◆</i>
+          <h1 class="fc-intro-title">Block complete</h1>
+          <p id="blockSummaryDesc" class="fc-intro-desc"></p>
+          <button id="btnStartCheck" class="fc-btn fc-btn--primary">Check recall →</button>
+        </div>
+      </div>
+
+      <!-- ── Block recall check (diagnostic-style) ── -->
+      <div id="screenBlockCheck" class="fc-screen">
+        <div class="fc-progress-bar">
+          <div id="checkProgressFill" class="fc-progress-fill"></div>
+        </div>
+        <p class="fc-counter">
+          <span id="checkCurrent">1</span> / <span id="checkTotal">20</span>
+        </p>
+        <div id="checkCard" class="fc-card" role="button" tabindex="0" aria-label="Tap to reveal Russian translation">
+          <div class="fc-card-inner">
+            <div class="fc-card-face fc-card-front">
+              <span class="fc-card-lang">English</span>
+              <div id="checkEnglish" class="fc-card-main"></div>
+            </div>
+            <div class="fc-card-face fc-card-back">
+              <span class="fc-card-lang">Russian</span>
+              <div id="checkRussian" class="fc-card-main"></div>
+            </div>
+          </div>
+        </div>
+        <p id="checkTapHint" class="fc-hint">Tap the card to reveal the Russian.</p>
+        <div id="checkBtns" class="fc-diag-btns" hidden>
+          <button id="btnCheckDontKnow" class="fc-btn fc-btn--ghost">Didn't recall</button>
+          <button id="btnCheckKnow"     class="fc-btn fc-btn--primary">Recalled it ✓</button>
+        </div>
+      </div>
+
+      <!-- ── Block results ── -->
+      <div id="screenBlockResults" class="fc-screen">
+        <div class="fc-intro">
+          <i id="blockResultsIcon" class="fc-intro-icon">◈</i>
+          <h1 id="blockResultsTitle" class="fc-intro-title">Block result</h1>
+          <p id="blockResultsDesc" class="fc-intro-desc"></p>
+          <button id="btnNextBlock" class="fc-btn fc-btn--primary" hidden>Next block →</button>
+          <button id="btnEndSession" class="fc-btn fc-btn--ghost">Finish session</button>
         </div>
       </div>
 

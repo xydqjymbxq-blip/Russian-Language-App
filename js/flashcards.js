@@ -1,6 +1,6 @@
 /* ============================================================
    Russian Language App — Flashcard SRS Engine
-   Algorithm : SM-2
+   Algorithm : FSRS-5
    Data       : data/flashcards.csv  (english, russian, sentence)
    Storage    : localStorage key 'russian_srs_v1'
    ============================================================ */
@@ -12,23 +12,64 @@ const DATA_URL         = 'data/flashcards.csv';
 const SRS_KEY          = 'russian_srs_v1';
 const DIAGNOSTIC_COUNT = 100;   // cards sampled for placement test
 const NEW_PER_DAY      = 20;    // new cards introduced per calendar day
+const BLOCK_SIZE       = 20;    // cards per study block
+
+// ── FSRS-5 parameters ─────────────────────────────────────────
+// w[0-3]: initial stability for ratings Again/Hard/Good/Easy
+// w[4-6]: difficulty initialisation and decay
+// w[7-10]: stability-after-recall growth
+// w[11-14]: stability-after-forgetting
+// w[15]: hard penalty, w[16]: easy bonus
+const FSRS_W = [
+  0.40255, 1.18385, 3.173,   15.69105,
+  7.1949,  0.5345,  1.4604,
+  0.0046,  1.54575, 0.1192,  1.01925,
+  1.9395,  0.11,    0.29605, 2.2700,
+  0.15,    2.9898
+];
+const FSRS_DECAY  = -0.5;
+const FSRS_FACTOR = Math.pow(0.9, 1 / FSRS_DECAY) - 1; // ≈ 0.2346
+const TARGET_R    = 0.9;
 
 // ── Module state ──────────────────────────────────────────────
-let allCards     = [];   // [{id, en, ru, sentence}, ...]
-let srs          = null; // persisted SRS data
-let diagSample   = [];   // array of card indices for diagnostic
-let diagIndex    = 0;
-let diagKnown    = 0;
-let sessionQueue = [];   // [{idx, isNew, showCount}, ...]
-let sessionPos   = 0;
-let isFlipped    = false;
-let sessionStats = { reviewed: 0, newShown: 0, again: 0 };
+let allCards          = [];   // [{id, en, ru, sentence}, ...]
+let srs               = null; // persisted SRS data
+
+// Diagnostic
+let diagSample  = [];
+let diagIndex   = 0;
+let diagKnown   = 0;
+
+// Session (persists across blocks)
+let remainingQueue    = [];   // cards not yet started this session
+let sessionStats      = { reviewed: 0, newShown: 0, again: 0 };
+
+// Current block (study phase)
+let blockQueue        = [];   // cards for current block (including re-queued)
+let blockPos          = 0;
+let blockStudied      = [];   // original card indices studied (for recall check)
+let isFlipped         = false;
+
+// Current block (recall-check phase)
+let blockCheckQueue   = [];
+let blockCheckPos     = 0;
+let blockCheckRecalled = 0;
 
 // ── DOM helpers ───────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
 function today() {
   return new Date().toISOString().split('T')[0];
+}
+
+function offsetDate(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+function daysBetween(a, b) {
+  return Math.round((new Date(b) - new Date(a)) / 86400000);
 }
 
 function showScreen(id) {
@@ -50,7 +91,7 @@ function loadSRS() {
 function defaultSRS() {
   return {
     diagnosticDone: false,
-    cards: {},       // keyed by card id (number as string)
+    cards: {},       // keyed by card index
     newToday: 0,
     newDate: today()
   };
@@ -68,36 +109,80 @@ function refreshNewCount() {
   }
 }
 
-// ── SM-2 algorithm ────────────────────────────────────────────
-// quality: 1 = Again  |  4 = Good  |  5 = Easy
-function sm2(prev, quality) {
-  let { interval = 1, reps = 0, ef = 2.5, lapses = 0 } = prev;
+// ── FSRS-5 algorithm ──────────────────────────────────────────
+// rating: 1=Again  2=Hard  3=Good  4=Easy
 
-  if (quality >= 3) {
-    if      (reps === 0) interval = 1;
-    else if (reps === 1) interval = 6;
-    else                 interval = Math.round(interval * ef);
-    reps += 1;
-  } else {
-    lapses  += 1;
-    interval = 1;
-    reps     = 0;
+function retrievability(t, S) {
+  return Math.pow(1 + FSRS_FACTOR * t / S, FSRS_DECAY);
+}
+
+function initDifficulty(rating) {
+  return Math.min(10, Math.max(1, FSRS_W[4] - (rating - 3) * FSRS_W[5]));
+}
+
+function nextDifficulty(D, rating) {
+  const meanD0 = initDifficulty(3);
+  return Math.min(10, Math.max(1,
+    FSRS_W[6] * meanD0 + (1 - FSRS_W[6]) * (D - FSRS_W[7] * (rating - 3))
+  ));
+}
+
+function nextInterval(S) {
+  return Math.max(1, Math.round(
+    S / FSRS_FACTOR * (Math.pow(TARGET_R, 1 / FSRS_DECAY) - 1)
+  ));
+}
+
+function fsrs(prev, rating) {
+  const t = today();
+
+  if (!prev.seen) {
+    // First encounter — initialise from rating
+    const S = FSRS_W[rating - 1];
+    const D = parseFloat(initDifficulty(rating).toFixed(3));
+    if (rating === 1) {
+      return { stability: parseFloat(S.toFixed(3)), difficulty: D,
+               reps: 1, lapses: 0, due: offsetDate(1), seen: true, lastReview: t };
+    }
+    return { stability: parseFloat(S.toFixed(3)), difficulty: D,
+             reps: 1, lapses: 0, due: offsetDate(nextInterval(S)), seen: true, lastReview: t };
   }
 
-  ef = ef + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02);
-  if (ef < 1.3) ef = 1.3;
+  // Existing card — may come from old SM-2 data; be tolerant
+  const S       = prev.stability || prev.interval || 1;
+  const D       = parseFloat(nextDifficulty(prev.difficulty || 5, rating).toFixed(3));
+  const elapsed = prev.lastReview
+    ? daysBetween(prev.lastReview, t)
+    : (prev.interval || 1);
+  const R = retrievability(Math.max(0, elapsed), S);
 
-  const due = new Date();
-  due.setDate(due.getDate() + interval);
+  if (rating === 1) {
+    // Forgot — stability after failure
+    const Snew = Math.max(0.1,
+      FSRS_W[11] * Math.pow(D, -FSRS_W[12]) *
+      (Math.pow(S + 1, FSRS_W[13]) - 1) *
+      Math.exp(FSRS_W[14] * (1 - R))
+    );
+    return { stability: parseFloat(Snew.toFixed(3)), difficulty: D,
+             reps: (prev.reps || 0) + 1, lapses: (prev.lapses || 0) + 1,
+             due: offsetDate(1), seen: true, lastReview: t };
+  }
 
-  return {
-    interval,
-    reps,
-    ef:     parseFloat(ef.toFixed(3)),
-    due:    due.toISOString().split('T')[0],
-    lapses,
-    seen:   true
-  };
+  // Recalled — stability after recall
+  const hardPenalty = rating === 2 ? FSRS_W[15] : 1;
+  const easyBonus   = rating === 4 ? FSRS_W[16] : 1;
+  const Snew = Math.max(S * 0.1,
+    S * (
+      Math.exp(FSRS_W[8]) *
+      (11 - D) *
+      Math.pow(S, -FSRS_W[9]) *
+      (Math.exp(FSRS_W[10] * (1 - R)) - 1) *
+      hardPenalty * easyBonus + 1
+    )
+  );
+  return { stability: parseFloat(Snew.toFixed(3)), difficulty: D,
+           reps: (prev.reps || 0) + 1, lapses: prev.lapses || 0,
+           due: offsetDate(nextInterval(Snew)), seen: true, lastReview: t };
 }
 
 // ── CSV parser ────────────────────────────────────────────────
@@ -107,7 +192,6 @@ function parseCSV(text) {
 
   const headers = splitCSVRow(lines[0]).map(h => h.toLowerCase().trim());
 
-  // Flexible column detection
   const find = (candidates) =>
     candidates.map(k => headers.indexOf(k)).find(i => i >= 0) ?? -1;
 
@@ -115,7 +199,6 @@ function parseCSV(text) {
   const ruCol  = find(['ru', 'russian', 'word', 'term', 'russian_word']);
   const senCol = find(['sentence', 'example', 'context', 'phrase', 'example_sentence']);
 
-  // Fallback: use first two columns if named columns not found
   const col0 = enCol  >= 0 ? enCol  : 0;
   const col1 = ruCol  >= 0 ? ruCol  : 1;
 
@@ -142,7 +225,6 @@ function splitCSVRow(line) {
   for (let i = 0; i < line.length; i++) {
     const ch = line[i];
     if (ch === '"') {
-      // Handle escaped double-quotes ("")
       if (inQuotes && line[i + 1] === '"') { cell += '"'; i++; }
       else inQuotes = !inQuotes;
     } else if (ch === ',' && !inQuotes) {
@@ -164,7 +246,6 @@ function buildDiagnosticSample() {
   for (let i = 0; i < allCards.length && sample.length < n; i += step) {
     sample.push(i);
   }
-  // Fisher-Yates shuffle
   for (let i = sample.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [sample[i], sample[j]] = [sample[j], sample[i]];
@@ -188,10 +269,9 @@ function renderDiagCard() {
   $('diagCurrent').textContent  = diagIndex + 1;
   $('diagProgressFill').style.width =
     ((diagIndex / diagSample.length) * 100) + '%';
-  // Reset to English side
   $('diagCard').classList.remove('flipped');
-  $('diagBtns').hidden     = true;
-  $('diagTapHint').hidden  = false;
+  $('diagBtns').hidden      = true;
+  $('diagTapHint').hidden   = false;
   $('diagQueueHint').hidden = true;
 }
 
@@ -207,11 +287,13 @@ function handleDiagAnswer(knows) {
   const idx = diagSample[diagIndex];
   if (knows) {
     diagKnown++;
-    // Seed known cards: already "seen once", due today so they enter review promptly
-    srs.cards[idx] = { interval: 3, reps: 1, ef: 2.5, due: today(), lapses: 0, seen: true };
+    // Seed as known in FSRS format — Good rating, due today so it enters review promptly
+    srs.cards[idx] = {
+      stability:  FSRS_W[2],
+      difficulty: parseFloat(initDifficulty(3).toFixed(3)),
+      reps: 1, lapses: 0, due: today(), seen: true, lastReview: today()
+    };
   }
-  // Unknown cards are left absent from srs.cards → treated as new
-
   diagIndex++;
   if (diagIndex >= diagSample.length) {
     finishDiagnostic();
@@ -258,7 +340,6 @@ function buildSessionQueue() {
     [due[i], due[j]] = [due[j], due[i]];
   }
 
-  // Cap new cards by daily allowance
   const newSlots = Math.max(0, NEW_PER_DAY - srs.newToday);
   const newBatch = newCards.slice(0, newSlots);
 
@@ -276,8 +357,8 @@ function showSessionIntro() {
   $('statDue').textContent = dueCount;
   $('statNew').textContent = newCount;
 
-  const btnStart      = $('btnStartSession');
-  const caughtUpNote  = $('allCaughtUp');
+  const btnStart     = $('btnStartSession');
+  const caughtUpNote = $('allCaughtUp');
 
   if (queue.length === 0) {
     btnStart.hidden     = true;
@@ -291,25 +372,32 @@ function showSessionIntro() {
   showScreen('screenSessionIntro');
 }
 
-// ── Review session ────────────────────────────────────────────
+// ── Review session — block-based ──────────────────────────────
 function startSession(queue) {
-  sessionQueue = queue;
-  sessionPos   = 0;
-  sessionStats = { reviewed: 0, newShown: 0, again: 0 };
-  renderReviewCard();
+  remainingQueue = [...queue];
+  sessionStats   = { reviewed: 0, newShown: 0, again: 0 };
+  startNextBlock();
+}
+
+function startNextBlock() {
+  const slice  = remainingQueue.splice(0, BLOCK_SIZE);
+  blockQueue   = [...slice];
+  blockPos     = 0;
+  blockStudied = slice.map(item => item.idx);
   showScreen('screenReview');
+  renderReviewCard();
 }
 
 function renderReviewCard() {
-  if (sessionPos >= sessionQueue.length) {
-    showSessionComplete();
+  if (blockPos >= blockQueue.length) {
+    showBlockSummary();
     return;
   }
 
-  const { idx } = sessionQueue[sessionPos];
+  const { idx } = blockQueue[blockPos];
   const card     = allCards[idx];
-  const total    = sessionQueue.length;
-  const done     = sessionPos;
+  const done     = blockPos;
+  const total    = blockQueue.length;
 
   isFlipped = false;
   $('reviewCard').classList.remove('flipped');
@@ -331,42 +419,122 @@ function flipCard() {
   $('ratingBtns').hidden = false;
 }
 
-function rateCard(quality) {
-  const item = sessionQueue[sessionPos];
+function rateCard(rating) {
+  const item = blockQueue[blockPos];
   const { idx, isNew, showCount } = item;
 
-  // Apply SM-2
-  const prev    = srs.cards[idx] || { interval: 1, reps: 0, ef: 2.5, lapses: 0, seen: false };
-  srs.cards[idx] = sm2(prev, quality);
+  // Apply FSRS
+  const prev     = srs.cards[idx] || { seen: false };
+  srs.cards[idx] = fsrs(prev, rating);
 
-  // Count new cards introduced
   if (isNew && showCount === 0) {
     sessionStats.newShown++;
     srs.newToday++;
   }
 
-  if (quality < 3) {
+  if (rating === 1) {
     sessionStats.again++;
-    // Re-queue once at end of session so user sees it again today
+    // Re-queue once within the block so the user sees it again
     if (showCount < 1) {
-      sessionQueue.push({ idx, isNew: false, showCount: showCount + 1 });
+      blockQueue.push({ idx, isNew: false, showCount: showCount + 1 });
     }
   } else {
     sessionStats.reviewed++;
   }
 
   saveSRS();
-  sessionPos++;
+  blockPos++;
   renderReviewCard();
 }
 
+// ── Block summary & recall check ─────────────────────────────
+function showBlockSummary() {
+  const n = blockStudied.length;
+  $('blockSummaryDesc').textContent =
+    `You just studied ${n} card${n !== 1 ? 's' : ''}. ` +
+    `Now let's see how many you can recall without hints.`;
+  showScreen('screenBlockSummary');
+}
+
+function startBlockCheck() {
+  // Deduplicate and shuffle the studied card indices
+  const unique = [...new Set(blockStudied)];
+  blockCheckQueue = [...unique];
+  for (let i = blockCheckQueue.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [blockCheckQueue[i], blockCheckQueue[j]] = [blockCheckQueue[j], blockCheckQueue[i]];
+  }
+  blockCheckPos      = 0;
+  blockCheckRecalled = 0;
+  $('checkTotal').textContent = blockCheckQueue.length;
+  renderCheckCard();
+  showScreen('screenBlockCheck');
+}
+
+function renderCheckCard() {
+  const idx  = blockCheckQueue[blockCheckPos];
+  const card = allCards[idx];
+  $('checkEnglish').textContent = card.en;
+  $('checkRussian').textContent = card.ru;
+  $('checkCurrent').textContent = blockCheckPos + 1;
+  $('checkProgressFill').style.width =
+    ((blockCheckPos / blockCheckQueue.length) * 100) + '%';
+  $('checkCard').classList.remove('flipped');
+  $('checkBtns').hidden    = true;
+  $('checkTapHint').hidden = false;
+}
+
+function flipCheckCard() {
+  if ($('checkCard').classList.contains('flipped')) return;
+  $('checkCard').classList.add('flipped');
+  $('checkBtns').hidden    = false;
+  $('checkTapHint').hidden = true;
+}
+
+function handleCheckAnswer(recalled) {
+  if (recalled) blockCheckRecalled++;
+  blockCheckPos++;
+  if (blockCheckPos >= blockCheckQueue.length) {
+    showBlockResults();
+  } else {
+    renderCheckCard();
+  }
+}
+
+function showBlockResults() {
+  const total    = blockCheckQueue.length;
+  const recalled = blockCheckRecalled;
+  const pct      = total > 0 ? Math.round((recalled / total) * 100) : 0;
+
+  $('blockResultsTitle').textContent = `${recalled} / ${total} recalled`;
+
+  let icon, feedback;
+  if (pct >= 80) {
+    icon     = '✓';
+    feedback = `${pct}% recall — excellent! Those words are sticking well.`;
+  } else if (pct >= 50) {
+    icon     = '◈';
+    feedback = `${pct}% recall — solid progress. Keep reviewing and they'll solidify.`;
+  } else {
+    icon     = '↻';
+    feedback = `${pct}% recall — these words need more practice. They'll reappear in your queue.`;
+  }
+  $('blockResultsIcon').textContent = icon;
+  $('blockResultsDesc').textContent = feedback;
+
+  const hasMore = remainingQueue.length > 0;
+  $('btnNextBlock').hidden    = !hasMore;
+  $('btnEndSession').textContent = hasMore ? 'End session' : 'Finish →';
+
+  showScreen('screenBlockResults');
+}
+
+// ── Session complete ──────────────────────────────────────────
 function showSessionComplete() {
   $('completedReviewed').textContent = sessionStats.reviewed;
   $('completedNew').textContent      = sessionStats.newShown;
   $('completedAgain').textContent    = sessionStats.again;
-  $('reviewProgressFill').style.width = '100%';
 
-  // Mark today as studied in the main progress store
   try {
     const KEY  = 'russian_app_progress';
     const raw  = localStorage.getItem(KEY);
@@ -397,7 +565,6 @@ async function initFlashcards() {
   showScreen('screenLoading');
   srs = loadSRS();
 
-  // Load CSV
   try {
     const res = await fetch(DATA_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -414,7 +581,7 @@ async function initFlashcards() {
     return;
   }
 
-  // Wire up events
+  // ── Diagnostic events ─────────────────────────────────────
   $('btnStartDiagnostic').addEventListener('click', startDiagnostic);
   $('btnDontKnow').addEventListener('click', () => handleDiagAnswer(false));
   $('btnKnow').addEventListener('click',    () => handleDiagAnswer(true));
@@ -424,6 +591,8 @@ async function initFlashcards() {
   diagCardEl.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flipDiagCard(); }
   });
+
+  // ── Session events ────────────────────────────────────────
   $('btnStartReview').addEventListener('click', showSessionIntro);
 
   const cardEl = $('reviewCard');
@@ -436,7 +605,23 @@ async function initFlashcards() {
     btn.addEventListener('click', () => rateCard(parseInt(btn.dataset.q, 10)));
   });
 
-  // Route to the correct starting screen
+  // ── Block check events ────────────────────────────────────
+  $('btnStartCheck').addEventListener('click', startBlockCheck);
+
+  const checkCardEl = $('checkCard');
+  checkCardEl.addEventListener('click', flipCheckCard);
+  checkCardEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flipCheckCard(); }
+  });
+
+  $('btnCheckDontKnow').addEventListener('click', () => handleCheckAnswer(false));
+  $('btnCheckKnow').addEventListener('click',     () => handleCheckAnswer(true));
+
+  // ── Block results events ──────────────────────────────────
+  $('btnNextBlock').addEventListener('click', startNextBlock);
+  $('btnEndSession').addEventListener('click', showSessionComplete);
+
+  // ── Route to correct starting screen ─────────────────────
   if (!srs.diagnosticDone) {
     showScreen('screenDiagnosticIntro');
   } else {

@@ -220,7 +220,7 @@
 /* Rating buttons */
 .fc-rating-btns {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 8px;
   width: 100%;
 }
@@ -241,6 +241,13 @@
   border-color: rgba(217,120,120,0.2);
 }
 .fc-rating-btn--again:hover { background: rgba(217,120,120,0.18); }
+
+.fc-rating-btn--hard {
+  color: #c4a45a;
+  background: rgba(196,164,90,0.08);
+  border-color: rgba(196,164,90,0.2);
+}
+.fc-rating-btn--hard:hover { background: rgba(196,164,90,0.18); }
 
 .fc-rating-btn--good {
   color: var(--color-accent);
