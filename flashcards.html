@@ -3,14 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#4f6ef7" />
+  <meta name="theme-color" content="#0e0d0c" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
-  <title>Flashcards — Russian Language App</title>
+  <link rel="stylesheet" href="css/flashcards.css" />
+  <title>Flashcards — Russian</title>
 </head>
 <body>
   <div class="app-shell">
+
     <header class="header">
       <div class="header-inner">
         <a href="index.html" class="logo" aria-label="Back to home">
@@ -19,13 +24,141 @@
         </a>
       </div>
     </header>
-    <main class="main" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding-top:80px;">
-      <p style="font-size:56px;">🚧</p>
-      <h1 style="font-size:22px;font-weight:800;">Flashcards — Coming Soon</h1>
-      <p style="color:var(--color-text-muted);max-width:280px;">This section is being built iteratively. Check back soon!</p>
-      <a href="index.html" style="margin-top:8px;padding:10px 22px;border-radius:10px;background:var(--color-accent);color:#fff;font-weight:600;font-size:14px;">← Back to Home</a>
+
+    <main class="main fc-main">
+
+      <!-- ── Loading ── -->
+      <div id="screenLoading" class="fc-screen fc-screen--active">
+        <div class="fc-spinner"></div>
+        <p class="fc-hint">Loading flashcards…</p>
+      </div>
+
+      <!-- ── Diagnostic intro ── -->
+      <div id="screenDiagnosticIntro" class="fc-screen">
+        <div class="fc-intro">
+          <i class="fc-intro-icon">◈</i>
+          <h1 class="fc-intro-title">Placement test</h1>
+          <p class="fc-intro-desc">
+            We'll show you 100 words drawn from across the full deck.
+            For each one, say whether you recognise it. This takes about
+            3 minutes and lets us build a personalised review queue.
+          </p>
+          <button id="btnStartDiagnostic" class="fc-btn fc-btn--primary">Begin →</button>
+        </div>
+      </div>
+
+      <!-- ── Diagnostic card ── -->
+      <div id="screenDiagnostic" class="fc-screen">
+        <div class="fc-progress-bar">
+          <div id="diagProgressFill" class="fc-progress-fill"></div>
+        </div>
+        <p class="fc-counter">
+          <span id="diagCurrent">1</span> / <span id="diagTotal">100</span>
+        </p>
+        <div class="fc-card fc-card--diagnostic" aria-live="polite">
+          <div class="fc-card-inner">
+            <span class="fc-card-lang">Russian</span>
+            <div id="diagRussian" class="fc-card-main"></div>
+          </div>
+        </div>
+        <div class="fc-diag-btns">
+          <button id="btnDontKnow" class="fc-btn fc-btn--ghost">Don't know</button>
+          <button id="btnKnow"     class="fc-btn fc-btn--primary">I know this</button>
+        </div>
+        <p class="fc-hint">Unknown words will appear first in your queue.</p>
+      </div>
+
+      <!-- ── Diagnostic complete ── -->
+      <div id="screenDiagnosticComplete" class="fc-screen">
+        <div class="fc-intro">
+          <i class="fc-intro-icon">✓</i>
+          <h1 class="fc-intro-title">Placement done</h1>
+          <p id="diagSummary" class="fc-intro-desc"></p>
+          <button id="btnStartReview" class="fc-btn fc-btn--primary">Start studying →</button>
+        </div>
+      </div>
+
+      <!-- ── Session intro ── -->
+      <div id="screenSessionIntro" class="fc-screen">
+        <div class="fc-intro">
+          <i class="fc-intro-icon">⧗</i>
+          <h1 class="fc-intro-title">Today's session</h1>
+          <div class="fc-session-stats">
+            <div class="fc-session-stat">
+              <span id="statDue" class="fc-session-num">0</span>
+              <span class="fc-session-label">due for review</span>
+            </div>
+            <div class="fc-session-stat">
+              <span id="statNew" class="fc-session-num">0</span>
+              <span class="fc-session-label">new cards</span>
+            </div>
+          </div>
+          <button id="btnStartSession" class="fc-btn fc-btn--primary">Study now →</button>
+          <p id="allCaughtUp" class="fc-hint" hidden>All caught up — nothing due today.</p>
+        </div>
+      </div>
+
+      <!-- ── Review card ── -->
+      <div id="screenReview" class="fc-screen">
+        <div class="fc-progress-bar">
+          <div id="reviewProgressFill" class="fc-progress-fill"></div>
+        </div>
+        <p class="fc-counter">
+          <span id="reviewCurrent">1</span> / <span id="reviewTotal">0</span>
+        </p>
+
+        <div id="reviewCard" class="fc-card" role="button" tabindex="0" aria-label="Tap to reveal answer">
+          <div class="fc-card-inner">
+            <!-- Front: English prompt -->
+            <div class="fc-card-face fc-card-front">
+              <span class="fc-card-lang">English</span>
+              <div id="reviewEnglish" class="fc-card-main"></div>
+            </div>
+            <!-- Back: Russian answer -->
+            <div class="fc-card-face fc-card-back">
+              <span class="fc-card-lang">Russian</span>
+              <div id="reviewRussian" class="fc-card-main"></div>
+              <div id="reviewSentence" class="fc-card-sentence"></div>
+            </div>
+          </div>
+        </div>
+
+        <p id="tapHint" class="fc-hint">Tap card to reveal</p>
+
+        <div id="ratingBtns" class="fc-rating-btns" hidden>
+          <button class="fc-rating-btn fc-rating-btn--again" data-q="1">Again</button>
+          <button class="fc-rating-btn fc-rating-btn--good"  data-q="4">Good</button>
+          <button class="fc-rating-btn fc-rating-btn--easy"  data-q="5">Easy</button>
+        </div>
+      </div>
+
+      <!-- ── Session complete ── -->
+      <div id="screenSessionComplete" class="fc-screen">
+        <div class="fc-intro">
+          <i class="fc-intro-icon">◆</i>
+          <h1 class="fc-intro-title">Session done</h1>
+          <div class="fc-session-stats">
+            <div class="fc-session-stat">
+              <span id="completedReviewed" class="fc-session-num">0</span>
+              <span class="fc-session-label">reviewed</span>
+            </div>
+            <div class="fc-session-stat">
+              <span id="completedNew" class="fc-session-num">0</span>
+              <span class="fc-session-label">new words</span>
+            </div>
+            <div class="fc-session-stat">
+              <span id="completedAgain" class="fc-session-num">0</span>
+              <span class="fc-session-label">to repeat</span>
+            </div>
+          </div>
+          <a href="index.html" class="fc-btn fc-btn--primary">Back to home</a>
+        </div>
+      </div>
+
     </main>
   </div>
+
   <script src="js/app.js"></script>
+  <script src="js/flashcards.js"></script>
 </body>
 </html>

@@ -1,9 +1,13 @@
-const CACHE_NAME = 'russian-app-v2';
+const CACHE_NAME = 'russian-app-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/flashcards.html',
   '/css/style.css',
+  '/css/flashcards.css',
   '/js/app.js',
+  '/js/flashcards.js',
+  '/data/flashcards.csv',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
