@@ -183,10 +183,24 @@ function startDiagnostic() {
 
 function renderDiagCard() {
   const card = allCards[diagSample[diagIndex]];
+  $('diagEnglish').textContent  = card.en;
   $('diagRussian').textContent  = card.ru;
   $('diagCurrent').textContent  = diagIndex + 1;
   $('diagProgressFill').style.width =
     ((diagIndex / diagSample.length) * 100) + '%';
+  // Reset to English side
+  $('diagCard').classList.remove('flipped');
+  $('diagBtns').hidden     = true;
+  $('diagTapHint').hidden  = false;
+  $('diagQueueHint').hidden = true;
+}
+
+function flipDiagCard() {
+  if ($('diagCard').classList.contains('flipped')) return;
+  $('diagCard').classList.add('flipped');
+  $('diagBtns').hidden      = false;
+  $('diagTapHint').hidden   = true;
+  $('diagQueueHint').hidden = false;
 }
 
 function handleDiagAnswer(knows) {
@@ -404,6 +418,12 @@ async function initFlashcards() {
   $('btnStartDiagnostic').addEventListener('click', startDiagnostic);
   $('btnDontKnow').addEventListener('click', () => handleDiagAnswer(false));
   $('btnKnow').addEventListener('click',    () => handleDiagAnswer(true));
+
+  const diagCardEl = $('diagCard');
+  diagCardEl.addEventListener('click', flipDiagCard);
+  diagCardEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flipDiagCard(); }
+  });
   $('btnStartReview').addEventListener('click', showSessionIntro);
 
   const cardEl = $('reviewCard');

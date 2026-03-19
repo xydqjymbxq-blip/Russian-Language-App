@@ -55,17 +55,24 @@
         <p class="fc-counter">
           <span id="diagCurrent">1</span> / <span id="diagTotal">100</span>
         </p>
-        <div class="fc-card fc-card--diagnostic" aria-live="polite">
+        <div id="diagCard" class="fc-card fc-card--diagnostic" role="button" tabindex="0" aria-label="Tap to reveal Russian translation">
           <div class="fc-card-inner">
-            <span class="fc-card-lang">Russian</span>
-            <div id="diagRussian" class="fc-card-main"></div>
+            <div class="fc-card-face fc-card-front">
+              <span class="fc-card-lang">English</span>
+              <div id="diagEnglish" class="fc-card-main"></div>
+            </div>
+            <div class="fc-card-face fc-card-back">
+              <span class="fc-card-lang">Russian</span>
+              <div id="diagRussian" class="fc-card-main"></div>
+            </div>
           </div>
         </div>
-        <div class="fc-diag-btns">
+        <p id="diagTapHint" class="fc-hint">Tap the card to reveal the Russian.</p>
+        <div id="diagBtns" class="fc-diag-btns" hidden>
           <button id="btnDontKnow" class="fc-btn fc-btn--ghost">Don't know</button>
           <button id="btnKnow"     class="fc-btn fc-btn--primary">I know this</button>
         </div>
-        <p class="fc-hint">Unknown words will appear first in your queue.</p>
+        <p id="diagQueueHint" class="fc-hint" hidden>Unknown words will appear first in your queue.</p>
       </div>
 
       <!-- ── Diagnostic complete ── -->

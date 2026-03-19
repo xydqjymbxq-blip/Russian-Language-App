@@ -107,11 +107,6 @@
   user-select: none;
 }
 
-.fc-card--diagnostic {
-  cursor: default;
-  pointer-events: none;
-}
-
 .fc-card-inner {
   position: relative;
   width: 100%;
@@ -119,23 +114,13 @@
   transform-style: preserve-3d;
   transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface);
+  border: 1px solid rgba(255,240,220,0.22);
+  background: #2a2420;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.65), 0 0 0 1px rgba(196,145,90,0.07);
 }
 
 .fc-card.flipped .fc-card-inner {
   transform: rotateY(180deg);
-}
-
-/* Diagnostic uses flat layout — no flip */
-.fc-card--diagnostic .fc-card-inner {
-  transform-style: flat;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 28px;
 }
 
 .fc-card-face {
