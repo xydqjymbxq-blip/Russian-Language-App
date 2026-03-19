@@ -45,7 +45,7 @@ function getProgress() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : getDefaultProgress();
-  } catch {
+  } catch (e) {
     return getDefaultProgress();
   }
 }

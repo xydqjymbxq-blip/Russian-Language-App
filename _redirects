@@ -1,0 +1,6 @@
+/*
+  Netlify _redirects
+  Serve index.html for all routes so the PWA handles its own routing,
+  and direct URL hits don't return a 404.
+*/
+/*  /index.html  200

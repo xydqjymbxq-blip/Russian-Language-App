@@ -12,9 +12,10 @@ const STATIC_ASSETS = [
 // Install: cache static assets
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(STATIC_ASSETS))
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 // Activate: clear old caches
@@ -33,7 +34,9 @@ self.addEventListener('fetch', event => {
 
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(() => caches.match('/index.html'))
+      fetch(request).catch(() =>
+        caches.match('/index.html').then(cached => cached || caches.match('/'))
+      )
     );
     return;
   }

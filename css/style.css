@@ -64,6 +64,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
 .app-shell {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
   min-height: 100dvh;
   max-width: 700px;
   margin: 0 auto;
