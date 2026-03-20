@@ -1,38 +1,23 @@
 'use strict';
 
 // ── Config ─────────────────────────────────────────────────────
-const DATA_URL      = 'data/flashcards.csv';
-const TASK_API      = '/.netlify/functions/vocabulary-task';
-const VC_KEY        = 'vocab_v1';
-const QUIZ_SIZE     = 10;
-const ACTIVATE_SIZE = 5;
+const DATA_URL  = 'data/flashcards.csv';
+const VC_KEY    = 'vocab_v1';
+const QUIZ_SIZE = 10;
 
 // ── State ──────────────────────────────────────────────────────
 let allCards  = [];
 let vcData    = null;
-
 let quizWords = [];
 let quizIdx   = 0;
 let quizScore = 0;
+let ruVoice   = null;
 
-let actWords   = [];
-let actIdx     = 0;
-let actScore   = 0;
-let actTask    = '';
-let actRetryFn = null;
-
-let browseIdx     = 0;
-let browseFlipped = false;
-
-let ruVoice    = null;
-let lastMode   = 'quiz'; // track which mode finished for "Again →"
-
-// ── DOM ────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
 // ── Screens ────────────────────────────────────────────────────
 function show(id) {
-  ['vcWelcome','vcQuiz','vcActivate','vcSummary','vcBrowse'].forEach(s => $(s).hidden = s !== id);
+  ['vcWelcome','vcQuiz','vcSummary'].forEach(s => $(s).hidden = s !== id);
 }
 
 // ── Persistence ────────────────────────────────────────────────
@@ -122,9 +107,8 @@ function speak(text) {
 // ── Quiz ───────────────────────────────────────────────────────
 function startQuiz() {
   quizWords = pickWords(QUIZ_SIZE);
-  if (!quizWords.length) { endSession('quiz', 0, 0); return; }
+  if (!quizWords.length) { endSession(0, 0); return; }
   quizIdx = 0; quizScore = 0;
-  lastMode = 'quiz';
   show('vcQuiz');
   renderQuizCard();
 }
@@ -133,15 +117,15 @@ function renderQuizCard() {
   const card = quizWords[quizIdx];
   const pos  = quizIdx + 1;
   const tot  = quizWords.length;
-  $('vcFill').style.width         = `${((pos - 1) / tot) * 100}%`;
-  $('vcProgressText').textContent  = `${pos} / ${tot}`;
-  $('vcCardEn').textContent        = card.en;
-  $('vcInput').value               = '';
-  $('vcInputPhase').hidden         = false;
-  $('vcResultPhase').hidden        = true;
-  $('vcSelfAssess').hidden         = true;
-  $('vcNextBtn').hidden            = true;
-  $('vcSpeakBtn').onclick          = () => speak(card.ru);
+  $('vcFill').style.width        = `${((pos - 1) / tot) * 100}%`;
+  $('vcProgressText').textContent = `${pos} / ${tot}`;
+  $('vcCardEn').textContent       = card.en;
+  $('vcInput').value              = '';
+  $('vcInputPhase').hidden        = false;
+  $('vcResultPhase').hidden       = true;
+  $('vcSelfAssess').hidden        = true;
+  $('vcNextBtn').hidden           = true;
+  $('vcSpeakBtn').onclick         = () => speak(card.ru);
   setTimeout(() => $('vcInput').focus(), 50);
 }
 
@@ -156,8 +140,8 @@ function checkAnswer() {
   $('vcInputPhase').hidden  = true;
   $('vcResultPhase').hidden = false;
 
-  $('vcCardEn2').textContent    = card.en;
-  $('vcAnswerRu').textContent   = card.ru;
+  $('vcCardEn2').textContent  = card.en;
+  $('vcAnswerRu').textContent = card.ru;
   if (card.sentence) {
     $('vcAnswerSentence').textContent = card.sentence;
     $('vcAnswerSentence').hidden = false;
@@ -185,127 +169,18 @@ function handleMissed() { markPracticed(quizWords[quizIdx]);               $('vc
 
 function nextQuizCard() {
   quizIdx++;
-  if (quizIdx >= quizWords.length) endSession('quiz', quizScore, quizWords.length);
+  if (quizIdx >= quizWords.length) endSession(quizScore, quizWords.length);
   else renderQuizCard();
 }
 
-// ── Activate ───────────────────────────────────────────────────
-function startActivate() {
-  actWords = pickWords(ACTIVATE_SIZE);
-  if (!actWords.length) { endSession('activate', 0, 0); return; }
-  actIdx = 0; actScore = 0;
-  lastMode = 'activate';
-  show('vcActivate');
-  renderActCard();
-}
-
-function renderActCard() {
-  const card = actWords[actIdx];
-  const pos  = actIdx + 1;
-  const tot  = actWords.length;
-  $('vcActFill').style.width         = `${((pos - 1) / tot) * 100}%`;
-  $('vcActProgressText').textContent  = `${pos} / ${tot}`;
-  $('vcActWordEn').textContent        = card.en;
-  $('vcActWordRu').textContent        = card.ru;
-  $('vcActLoading').hidden            = false;
-  $('vcActTask').hidden               = true;
-  $('vcActInputPhase').hidden         = true;
-  $('vcActEvaluating').hidden         = true;
-  $('vcActFeedback').hidden           = true;
-  $('vcActError').hidden              = true;
-  $('vcActInput').value               = '';
-  actTask = '';
-  fetchTask(card);
-}
-
-async function fetchTask(card) {
-  actRetryFn = () => fetchTask(card);
-  try {
-    const res  = await fetch(TASK_API, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: 'generate', word: { en: card.en, ru: card.ru, sentence: card.sentence } }),
-    });
-    if (!res.ok) throw new Error(`Server error ${res.status}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    actTask = data.task;
-    $('vcActTaskText').textContent = data.task;
-    $('vcActHint').textContent     = data.hint || '';
-    $('vcActHint').hidden          = !data.hint;
-    $('vcActLoading').hidden       = true;
-    $('vcActTask').hidden          = false;
-    $('vcActInputPhase').hidden    = false;
-    setTimeout(() => $('vcActInput').focus(), 50);
-  } catch (err) { showActError(err.message); }
-}
-
-async function submitActivate() {
-  const card     = actWords[actIdx];
-  const response = $('vcActInput').value.trim();
-  if (!response) { skipActWord(); return; }
-  $('vcActInputPhase').hidden  = true;
-  $('vcActEvaluating').hidden  = false;
-  actRetryFn = () => submitActivate();
-  try {
-    const res  = await fetch(TASK_API, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: 'evaluate', word: { en: card.en, ru: card.ru }, task: actTask, response }),
-    });
-    if (!res.ok) throw new Error(`Server error ${res.status}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    $('vcActEvaluating').hidden = true;
-    showActFeedback(data, card);
-    markPracticed(card);
-    actScore += data.score ?? 0;
-  } catch (err) {
-    $('vcActEvaluating').hidden  = true;
-    $('vcActInputPhase').hidden  = false;
-    showActError(err.message);
-  }
-}
-
-function showActFeedback(data, card) {
-  const score = data.score ?? 0;
-  const badge = $('vcActBadge');
-  if (score === 2)      { badge.textContent = '✓ Correct'; badge.className = 'vc-act-badge vc-act-badge--ok'; }
-  else if (score === 1) { badge.textContent = '≈ Close';   badge.className = 'vc-act-badge vc-act-badge--partial'; }
-  else                  { badge.textContent = '✗ Missed';  badge.className = 'vc-act-badge vc-act-badge--miss'; }
-  $('vcActFeedbackText').textContent = data.feedback || '';
-  if (data.correction) {
-    $('vcActCorrectionText').textContent = data.correction;
-    $('vcActCorrectionWrap').hidden = false;
-  } else {
-    $('vcActCorrectionWrap').hidden = true;
-  }
-  $('vcActSpeakBtn').onclick = () => speak(card.ru);
-  $('vcActFeedback').hidden  = false;
-}
-
-function showActError(msg) {
-  $('vcActLoading').hidden    = true;
-  $('vcActEvaluating').hidden = true;
-  $('vcActErrorMsg').textContent = msg || 'Something went wrong.';
-  $('vcActError').hidden = false;
-}
-
-function skipActWord() { markPracticed(actWords[actIdx]); nextActWord(); }
-
-function nextActWord() {
-  actIdx++;
-  if (actIdx >= actWords.length) endSession('activate', actScore, actWords.length * 2);
-  else renderActCard();
-}
-
-// ── Shared session end ─────────────────────────────────────────
+// ── Session end ────────────────────────────────────────────────
 function markPracticed(card) {
   vcData.practiced[card.id] = today();
   save();
 }
 
-function endSession(mode, score, maxScore) {
-  $('vcFill') && ($('vcFill').style.width = '100%');
-  $('vcActFill') && ($('vcActFill').style.width = '100%');
+function endSession(score, maxScore) {
+  $('vcFill').style.width = '100%';
   const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
   $('vcScoreCircle').textContent = maxScore > 0 ? `${score}/${maxScore}` : '—';
   $('vcSummaryMsg').textContent = maxScore === 0
@@ -315,25 +190,6 @@ function endSession(mode, score, maxScore) {
     : `${pct}% — these need more practice.`;
   renderStats();
   show('vcSummary');
-}
-
-// ── Browse ─────────────────────────────────────────────────────
-function startBrowse() {
-  browseIdx = 0; browseFlipped = false;
-  renderBrowseCard();
-  show('vcBrowse');
-}
-
-function renderBrowseCard() {
-  const card = allCards[browseIdx];
-  $('vcBrowseCounter').textContent = `${browseIdx + 1} / ${allCards.length}`;
-  $('vcFlipEn').textContent = card.en;
-  $('vcFlipRu').textContent = card.ru;
-  if (card.sentence) { $('vcFlipSentence').textContent = card.sentence; $('vcFlipSentence').hidden = false; }
-  else               { $('vcFlipSentence').hidden = true; }
-  browseFlipped = false;
-  $('vcFlipCard').classList.remove('vc-flipped');
-  $('vcFlipSpeakBtn').onclick = e => { e.stopPropagation(); speak(card.ru); };
 }
 
 // ── Init ───────────────────────────────────────────────────────
@@ -348,12 +204,8 @@ async function init() {
   renderStats();
   show('vcWelcome');
 
-  // Welcome
   $('vcStartBtn').addEventListener('click', startQuiz);
-  $('vcActivateBtn').addEventListener('click', startActivate);
-  $('vcBrowseBtn').addEventListener('click', startBrowse);
 
-  // Quiz
   $('vcQuizBack').addEventListener('click', () => { renderStats(); show('vcWelcome'); });
   $('vcCheckBtn').addEventListener('click', checkAnswer);
   $('vcSkipBtn').addEventListener('click',  () => { $('vcInput').value = ''; checkAnswer(); });
@@ -362,35 +214,7 @@ async function init() {
   $('vcMissedBtn').addEventListener('click', handleMissed);
   $('vcNextBtn').addEventListener('click',   nextQuizCard);
 
-  // Activate
-  $('vcActBack').addEventListener('click', () => { renderStats(); show('vcWelcome'); });
-  $('vcActSubmitBtn').addEventListener('click', submitActivate);
-  $('vcActSkipBtn').addEventListener('click',   skipActWord);
-  $('vcActNextBtn').addEventListener('click',   nextActWord);
-  $('vcActRetryBtn').addEventListener('click',  () => { $('vcActError').hidden = true; actRetryFn?.(); });
-  $('vcActSkipErrBtn').addEventListener('click',() => { $('vcActError').hidden = true; skipActWord(); });
-  $('vcActInput').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submitActivate(); } });
-
-  // Summary — "Again" repeats whichever mode just ran
-  $('vcAgainBtn').addEventListener('click', () => {
-    renderStats();
-    lastMode === 'activate' ? startActivate() : startQuiz();
-  });
-
-  // Browse
-  $('vcBrowseBack').addEventListener('click', () => { renderStats(); show('vcWelcome'); });
-  $('vcFlipCard').addEventListener('click', () => {
-    browseFlipped = !browseFlipped;
-    $('vcFlipCard').classList.toggle('vc-flipped', browseFlipped);
-  });
-  $('vcBrowsePrev').addEventListener('click', () => { if (browseIdx > 0) { browseIdx--; renderBrowseCard(); } });
-  $('vcBrowseNext').addEventListener('click', () => { if (browseIdx < allCards.length - 1) { browseIdx++; renderBrowseCard(); } });
-  document.addEventListener('keydown', e => {
-    if ($('vcBrowse').hidden) return;
-    if (e.key === 'ArrowLeft'  && browseIdx > 0)                   { browseIdx--; renderBrowseCard(); }
-    if (e.key === 'ArrowRight' && browseIdx < allCards.length - 1) { browseIdx++; renderBrowseCard(); }
-    if (e.key === ' ') { e.preventDefault(); $('vcFlipCard').click(); }
-  });
+  $('vcAgainBtn').addEventListener('click', () => { renderStats(); startQuiz(); });
 }
 
 document.addEventListener('DOMContentLoaded', init);

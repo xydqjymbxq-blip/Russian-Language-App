@@ -32,14 +32,8 @@
       <div id="vcWelcome" class="vc-screen vc-welcome">
         <h1 class="vc-welcome-title">Vocabulary</h1>
         <div id="vcStats" class="vc-stats"></div>
-        <div class="vc-welcome-actions">
-          <button id="vcStartBtn" class="vc-primary-btn">Recall quiz →</button>
-          <button id="vcActivateBtn" class="vc-activate-btn">✍ Activate with AI →</button>
-        </div>
-        <div class="vc-welcome-links">
-          <button id="vcBrowseBtn" class="vc-text-link">Browse all cards</button>
-          <a href="index.html" class="vc-text-link">← Home</a>
-        </div>
+        <button id="vcStartBtn" class="vc-primary-btn">Start quiz →</button>
+        <a href="index.html" class="vc-text-link">← Home</a>
       </div>
 
       <!-- ── Quiz ── -->
@@ -92,86 +86,6 @@
         </div><!-- /vc-panel -->
       </div><!-- /vcQuiz -->
 
-      <!-- ── Activate ── -->
-      <div id="vcActivate" class="vc-screen vc-session" hidden>
-
-        <div class="vc-session-header">
-          <button id="vcActBack" class="vc-back-btn">← Back</button>
-          <span class="vc-session-label">Activate</span>
-          <span class="vc-progress-text" id="vcActProgressText">1 / 5</span>
-        </div>
-        <div class="vc-progress-bar"><div class="vc-progress-fill" id="vcActFill"></div></div>
-
-        <div class="vc-panel">
-
-          <!-- Word display -->
-          <div class="vc-act-word">
-            <p class="vc-card-en" id="vcActWordEn"></p>
-            <p class="vc-act-word-ru" id="vcActWordRu"></p>
-          </div>
-
-          <!-- Loading task -->
-          <div id="vcActLoading" class="vc-loading-row">
-            <span class="vc-spinner"></span>
-            <span>Generating task…</span>
-          </div>
-
-          <!-- Task + input -->
-          <div id="vcActTask" hidden>
-            <div class="vc-divider"></div>
-            <p class="vc-act-task-text" id="vcActTaskText"></p>
-            <p class="vc-act-hint" id="vcActHint"></p>
-          </div>
-
-          <div id="vcActInputPhase" hidden>
-            <textarea id="vcActInput" class="vc-input" rows="3"
-              placeholder="Write your Russian response here… (Ctrl+Enter to submit)"
-              autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
-            <div class="vc-btn-row">
-              <button id="vcActSubmitBtn" class="vc-primary-btn">Submit →</button>
-              <button id="vcActSkipBtn" class="vc-ghost-btn">Skip</button>
-            </div>
-          </div>
-
-          <!-- Evaluating -->
-          <div id="vcActEvaluating" class="vc-loading-row" hidden>
-            <span class="vc-spinner"></span>
-            <span>Evaluating…</span>
-          </div>
-
-          <!-- Feedback -->
-          <div id="vcActFeedback" hidden>
-            <div class="vc-divider"></div>
-            <div class="vc-act-score-row">
-              <span class="vc-act-badge" id="vcActBadge"></span>
-              <button class="vc-speak-btn" id="vcActSpeakBtn" aria-label="Hear the word">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                </svg>
-              </button>
-            </div>
-            <p class="vc-act-feedback-text" id="vcActFeedbackText"></p>
-            <div class="vc-act-correction" id="vcActCorrectionWrap" hidden>
-              <span class="vc-answer-label">Correction</span>
-              <p class="vc-act-correction-text" id="vcActCorrectionText"></p>
-            </div>
-            <button id="vcActNextBtn" class="vc-primary-btn">Next →</button>
-          </div>
-
-          <!-- Error -->
-          <div id="vcActError" class="vc-error-row" hidden>
-            <p id="vcActErrorMsg">Could not reach the server.</p>
-            <div class="vc-btn-row">
-              <button id="vcActRetryBtn" class="vc-ghost-btn">Retry</button>
-              <button id="vcActSkipErrBtn" class="vc-ghost-btn">Skip word</button>
-            </div>
-          </div>
-
-        </div><!-- /vc-panel -->
-      </div><!-- /vcActivate -->
-
       <!-- ── Summary ── -->
       <div id="vcSummary" class="vc-screen vc-welcome" hidden>
         <div class="vc-score-circle" id="vcScoreCircle"></div>
@@ -179,45 +93,6 @@
         <button id="vcAgainBtn" class="vc-primary-btn">Again →</button>
         <a href="index.html" class="vc-text-link">← Home</a>
       </div>
-
-      <!-- ── Browse ── -->
-      <div id="vcBrowse" class="vc-screen vc-session" hidden>
-
-        <div class="vc-session-header">
-          <button id="vcBrowseBack" class="vc-back-btn">← Back</button>
-          <span class="vc-browse-counter" id="vcBrowseCounter">1 / 7981</span>
-          <div style="width:56px"></div>
-        </div>
-
-        <div class="vc-card-scene">
-          <div class="vc-flip-card" id="vcFlipCard">
-            <div class="vc-flip-front">
-              <span class="vc-flip-lang">English</span>
-              <p class="vc-flip-word" id="vcFlipEn"></p>
-            </div>
-            <div class="vc-flip-back">
-              <span class="vc-flip-lang">Russian</span>
-              <p class="vc-flip-word" id="vcFlipRu"></p>
-              <p class="vc-flip-sentence" id="vcFlipSentence"></p>
-              <button class="vc-speak-btn vc-flip-speak" id="vcFlipSpeakBtn" aria-label="Play audio">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <p class="vc-flip-hint">Tap to flip</p>
-
-        <div class="vc-browse-nav">
-          <button id="vcBrowsePrev" class="vc-nav-btn">← Prev</button>
-          <button id="vcBrowseNext" class="vc-nav-btn">Next →</button>
-        </div>
-
-      </div><!-- /vcBrowse -->
 
     </main>
   </div>
