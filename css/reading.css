@@ -1,0 +1,432 @@
+/* ============================================================
+   Reading — passage, explain, questions styles
+   Builds on css/grammar.css (shared components) and
+   css/drills.css (level selector via .dr-level-btn)
+   ============================================================ */
+
+/* ── Main layout ─────────────────────────────────────────────── */
+.rd-main {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ── Welcome screen ──────────────────────────────────────────── */
+.rd-welcome {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 20px;
+}
+
+/* ── Loading screen ──────────────────────────────────────────── */
+.rd-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.rd-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--color-border-strong);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: rd-spin 0.8s linear infinite;
+}
+
+@keyframes rd-spin { to { transform: rotate(360deg); } }
+
+.rd-loading-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.rd-loading-sub {
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+/* ── Reading screen ──────────────────────────────────────────── */
+.rd-reading {
+  padding: 0 20px;
+}
+
+/* ── Meta bar ────────────────────────────────────────────────── */
+.rd-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 0 18px;
+}
+
+.rd-level-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
+  border: 1px solid var(--color-accent-muted);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.rd-topic-label {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+/* ── Passage text ────────────────────────────────────────────── */
+.rd-passage {
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--color-text);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.rd-passage p {
+  margin-bottom: 1.3em;
+}
+
+.rd-passage p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Highlight hint ──────────────────────────────────────────── */
+.rd-hint {
+  font-size: 11px;
+  color: var(--color-text-faint);
+  margin: 14px 0 24px;
+  text-align: center;
+}
+
+/* ── Questions section ───────────────────────────────────────── */
+.rd-qs-section {
+  border-top: 1px solid var(--color-border-strong);
+  padding-top: 4px;
+  margin-top: 4px;
+}
+
+.rd-qs-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.rd-qs-toggle:hover { color: var(--color-text); }
+
+.rd-qs-toggle-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.rd-qs-toggle--open .rd-qs-toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* ── Question list ───────────────────────────────────────────── */
+.rd-qs {
+  padding-bottom: 8px;
+}
+
+.rd-qs-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 20px;
+  padding: 0;
+  counter-reset: q-counter;
+}
+
+.rd-q-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  counter-increment: q-counter;
+}
+
+.rd-q-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.rd-q-text::before {
+  content: counter(q-counter) ". ";
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.rd-q-input {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 10px 12px;
+  resize: vertical;
+  min-height: 60px;
+  transition: border-color 0.2s;
+}
+
+.rd-q-input:focus {
+  outline: none;
+  border-color: var(--color-accent-muted);
+}
+
+.rd-q-input::placeholder { color: var(--color-text-faint); }
+
+.rd-q-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Question feedback ───────────────────────────────────────── */
+.rd-q-feedback {
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+}
+
+.rd-q-feedback--correct {
+  background: rgba(120,184,135,0.08);
+  border-color: rgba(120,184,135,0.2);
+  color: #78b887;
+}
+
+.rd-q-feedback--partial {
+  background: rgba(196,164,90,0.08);
+  border-color: rgba(196,164,90,0.2);
+  color: #c4a45a;
+}
+
+.rd-q-feedback--wrong {
+  background: rgba(217,120,120,0.08);
+  border-color: rgba(217,120,120,0.2);
+  color: #d97878;
+}
+
+.rd-q-mark {
+  font-size: 15px;
+  margin-right: 4px;
+}
+
+/* ── Check button ────────────────────────────────────────────── */
+.rd-check-btn {
+  width: 100%;
+  padding: 13px 24px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-bottom: 8px;
+}
+
+.rd-check-btn:hover:not(:disabled)  { opacity: 0.88; }
+.rd-check-btn:active:not(:disabled) { opacity: 0.75; }
+.rd-check-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Reading footer ──────────────────────────────────────────── */
+.rd-footer {
+  display: flex;
+  gap: 10px;
+  padding: 28px 0 8px;
+  border-top: 1px solid var(--color-border-strong);
+  margin-top: 24px;
+}
+
+.rd-footer-btn {
+  flex: 1;
+  padding: 11px 0;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.rd-footer-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-text-faint);
+}
+
+/* ── Explain bar (fixed bottom) ──────────────────────────────── */
+.rd-explain-bar {
+  position: fixed;
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 680px;
+  background: var(--color-surface-2);
+  border-top: 1px solid var(--color-border-strong);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s;
+}
+
+.rd-explain-bar--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.rd-explain-preview {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rd-explain-trigger {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.rd-explain-trigger:hover { opacity: 0.88; }
+
+.rd-explain-dismiss {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-faint);
+  font-size: 14px;
+  cursor: pointer;
+  background: transparent;
+  transition: color 0.15s;
+}
+
+.rd-explain-dismiss:hover { color: var(--color-text-muted); }
+
+/* ── Explain panel (fixed bottom sheet) ──────────────────────── */
+.rd-explain-panel {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 680px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.5);
+  z-index: 300;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rd-explain-panel--visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+.rd-explain-panel-inner {
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+}
+
+.rd-explain-panel-hdr {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.rd-explain-word {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-accent);
+  line-height: 1.4;
+}
+
+.rd-explain-close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-faint);
+  font-size: 14px;
+  cursor: pointer;
+  background: transparent;
+  transition: color 0.15s;
+}
+
+.rd-explain-close:hover { color: var(--color-text-muted); }
+
+.rd-explain-body {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--color-text);
+  min-height: 40px;
+}
+
+.rd-explain-body p          { margin-bottom: 8px; }
+.rd-explain-body p:last-child { margin-bottom: 0; }
+.rd-explain-body strong     { color: var(--color-accent); font-weight: 600; }
+.rd-explain-body em         { font-style: italic; }
+
+/* ── Reduced motion ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .rd-spinner         { animation: none; }
+  .rd-explain-panel   { transition: none; }
+  .rd-explain-bar     { transition: none; }
+  .rd-qs-toggle-icon  { transition: none; }
+}
