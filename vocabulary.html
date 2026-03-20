@@ -40,8 +40,23 @@
 
           <div id="vcStats" class="vc-stats"></div>
 
-          <button id="vcStartBtn" class="vc-primary-btn">Start quiz →</button>
-          <button id="vcBrowseBtn" class="vc-ghost-btn">Browse all cards</button>
+          <div class="vc-mode-cards">
+            <button id="vcStartBtn" class="vc-mode-card">
+              <span class="vc-mode-icon">⚡</span>
+              <span class="vc-mode-name">Recall quiz</span>
+              <span class="vc-mode-desc">Type the Russian word from memory</span>
+            </button>
+            <button id="vcActivateBtn" class="vc-mode-card vc-mode-card--accent">
+              <span class="vc-mode-icon">✍️</span>
+              <span class="vc-mode-name">Activate</span>
+              <span class="vc-mode-desc">Use words in your own sentences — AI feedback</span>
+            </button>
+            <button id="vcBrowseBtn" class="vc-mode-card">
+              <span class="vc-mode-icon">📇</span>
+              <span class="vc-mode-name">Browse cards</span>
+              <span class="vc-mode-desc">Flip through with audio</span>
+            </button>
+          </div>
           <a href="index.html" class="vc-link">← Home</a>
         </div>
       </div>
@@ -101,6 +116,7 @@
           <h2 class="gr-welcome-title" style="margin-top:12px">Quiz complete!</h2>
           <p class="gr-welcome-desc" id="vcSummaryMsg"></p>
           <button id="vcAgainBtn" class="vc-primary-btn">New quiz →</button>
+          <button id="vcActivateAgainBtn" class="vc-ghost-btn">Activate again</button>
           <button id="vcBrowseBtn2" class="vc-ghost-btn">Browse cards</button>
           <a href="index.html" class="vc-link">← Home</a>
         </div>
@@ -145,6 +161,85 @@
         </div>
 
       </div><!-- /vcBrowse -->
+
+      <!-- ── Activate ── -->
+      <div id="vcActivate" class="vc-screen" hidden>
+
+        <!-- Progress -->
+        <div class="vc-progress-row">
+          <div class="vc-progress-bar"><div class="vc-progress-fill" id="vcActFill"></div></div>
+          <span class="vc-progress-text" id="vcActProgressText">1 / 5</span>
+        </div>
+
+        <!-- Word card -->
+        <div class="vc-quiz-card">
+          <span class="vc-answer-label">Word to activate</span>
+          <p class="vc-act-word-en" id="vcActWordEn"></p>
+          <p class="vc-act-word-ru" id="vcActWordRu"></p>
+        </div>
+
+        <!-- Task area -->
+        <div id="vcActTaskArea" class="vc-act-task-area">
+          <!-- Loading state -->
+          <div id="vcActLoading" class="vc-act-loading">
+            <span class="vc-spinner"></span>
+            <span>Generating task…</span>
+          </div>
+
+          <!-- Task display -->
+          <div id="vcActTask" hidden>
+            <p class="vc-act-task-text" id="vcActTaskText"></p>
+            <p class="vc-act-hint" id="vcActHint"></p>
+          </div>
+        </div>
+
+        <!-- Input phase -->
+        <div id="vcActInputPhase" hidden>
+          <textarea id="vcActInput" class="vc-input" rows="3"
+            placeholder="Write your Russian response here…"
+            autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+          <div class="vc-btn-row">
+            <button id="vcActSubmitBtn" class="vc-primary-btn">Submit →</button>
+            <button id="vcActSkipBtn" class="vc-ghost-btn">Skip</button>
+          </div>
+        </div>
+
+        <!-- Evaluating state -->
+        <div id="vcActEvaluating" class="vc-act-loading" hidden>
+          <span class="vc-spinner"></span>
+          <span>Evaluating…</span>
+        </div>
+
+        <!-- Feedback phase -->
+        <div id="vcActFeedback" hidden>
+          <div class="vc-act-feedback-box" id="vcActFeedbackBox">
+            <div class="vc-act-score-row">
+              <span class="vc-act-badge" id="vcActBadge"></span>
+              <button class="vc-speak-btn" id="vcActSpeakBtn" aria-label="Hear the word">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+              </button>
+            </div>
+            <p class="vc-act-feedback-text" id="vcActFeedbackText"></p>
+            <div class="vc-act-correction" id="vcActCorrectionWrap" hidden>
+              <span class="vc-answer-label">Suggested correction</span>
+              <p class="vc-act-correction-text" id="vcActCorrectionText"></p>
+            </div>
+          </div>
+          <button id="vcActNextBtn" class="vc-primary-btn">Next →</button>
+        </div>
+
+        <!-- Error state -->
+        <div id="vcActError" class="vc-act-error" hidden>
+          <p id="vcActErrorMsg">Could not reach the server. Check your connection.</p>
+          <button id="vcActRetryBtn" class="vc-ghost-btn">Retry</button>
+          <button id="vcActSkipErrBtn" class="vc-ghost-btn">Skip this word</button>
+        </div>
+
+      </div><!-- /vcActivate -->
 
     </main>
   </div>
