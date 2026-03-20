@@ -3,29 +3,189 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#4f6ef7" />
+  <meta name="theme-color" content="#0e0d0c" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
-  <title>Vocabulary — Russian Language App</title>
+  <link rel="stylesheet" href="css/grammar.css" />
+  <link rel="stylesheet" href="css/drills.css" />
+  <link rel="stylesheet" href="css/vocabulary.css" />
+  <title>Vocabulary — Russian</title>
 </head>
 <body>
   <div class="app-shell">
+
     <header class="header">
       <div class="header-inner">
         <a href="index.html" class="logo" aria-label="Back to home">
           <span class="logo-letter">Я</span>
           <span class="logo-text">Russian</span>
         </a>
+        <div id="vcHeaderActions" hidden>
+          <button id="vcModeToggleBtn" class="vc-mode-toggle-btn">Browse mode</button>
+        </div>
       </div>
     </header>
-    <main class="main" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding-top:80px;">
-      <p style="font-size:56px;">🚧</p>
-      <h1 style="font-size:22px;font-weight:800;">Vocabulary — Coming Soon</h1>
-      <p style="color:var(--color-text-muted);max-width:280px;">This section is being built iteratively. Check back soon!</p>
-      <a href="index.html" style="margin-top:8px;padding:10px 22px;border-radius:10px;background:var(--color-accent);color:#fff;font-weight:600;font-size:14px;">← Back to Home</a>
+
+    <main class="main vc-main">
+
+      <!-- ── Welcome ── -->
+      <div id="vcWelcome" class="vc-welcome">
+        <div class="gr-welcome-inner">
+          <i class="gr-welcome-icon">В</i>
+          <h1 class="gr-welcome-title">Vocabulary</h1>
+          <p class="gr-welcome-desc">
+            Progressive training on your flashcard deck — four stages from
+            recognition to free production.
+          </p>
+
+          <!-- Mode selector -->
+          <div class="vc-mode-row" role="group" aria-label="Select mode">
+            <button class="vc-mode-btn vc-mode-btn--active" data-mode="session">Session</button>
+            <button class="vc-mode-btn" data-mode="browse">Browse</button>
+          </div>
+
+          <!-- Session stats -->
+          <div id="vcStats" class="vc-stats"></div>
+
+          <button id="vcStartBtn" class="vc-start-btn">Start session →</button>
+          <a href="index.html" class="vc-home-link">← Home</a>
+        </div>
+      </div>
+
+      <!-- ── Loading ── -->
+      <div id="vcLoading" class="vc-loading" hidden>
+        <div class="vc-spinner"></div>
+        <p class="vc-loading-text">Loading vocabulary…</p>
+      </div>
+
+      <!-- ── Session screen ── -->
+      <div id="vcSession" class="vc-session" hidden>
+
+        <!-- Progress bar -->
+        <div class="vc-progress-row">
+          <div class="vc-progress-bar">
+            <div class="vc-progress-fill" id="vcProgressFill"></div>
+          </div>
+          <span class="vc-progress-text" id="vcProgressText">Word 1 / 5</span>
+        </div>
+
+        <!-- Stage header -->
+        <div class="vc-stage-header">
+          <span class="vc-stage-badge" id="vcStageBadge">Stage 1</span>
+          <span class="vc-stage-title" id="vcStageTitle">Contextual Exposure</span>
+        </div>
+
+        <!-- Content area -->
+        <div id="vcContent" class="vc-content"></div>
+
+        <!-- Feedback -->
+        <div id="vcFeedback" class="vc-feedback" hidden></div>
+
+        <!-- Input row -->
+        <div id="vcInputRow" class="vc-input-row" hidden>
+          <textarea id="vcInput" class="vc-input" rows="2" placeholder="Type your answer…"></textarea>
+          <div class="vc-input-btns">
+            <button id="vcMicBtn" class="vc-icon-btn" aria-label="Record answer" title="Record answer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+            <button id="vcSubmitBtn" class="vc-submit-btn">Submit →</button>
+          </div>
+        </div>
+
+        <!-- Action buttons (after feedback) -->
+        <div id="vcActions" class="vc-actions" hidden>
+          <button id="vcNextBtn" class="vc-next-btn">Next →</button>
+        </div>
+
+        <!-- Speaker button (persistent) -->
+        <div class="vc-speaker-row" id="vcSpeakerRow" hidden>
+          <button id="vcSpeakBtn" class="vc-icon-btn vc-speak-btn" aria-label="Play audio" title="Play audio">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+          </button>
+          <span class="vc-speak-label" id="vcSpeakLabel"></span>
+        </div>
+
+      </div><!-- /vcSession -->
+
+      <!-- ── Session complete ── -->
+      <div id="vcComplete" class="vc-complete" hidden>
+        <div class="vc-complete-inner">
+          <div class="vc-complete-icon">✓</div>
+          <h2 class="vc-complete-title">Session complete!</h2>
+          <p class="vc-complete-sub" id="vcCompleteMsg"></p>
+          <button id="vcNewSessionBtn" class="vc-start-btn">New session →</button>
+          <a href="index.html" class="vc-home-link">← Home</a>
+        </div>
+      </div>
+
+      <!-- ── Browse screen ── -->
+      <div id="vcBrowse" class="vc-browse" hidden>
+
+        <!-- Browse nav -->
+        <div class="vc-browse-nav">
+          <button id="vcBrowsePrev" class="vc-browse-arrow" aria-label="Previous">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="vc-browse-counter" id="vcBrowseCounter">1 / 100</span>
+          <button id="vcBrowseNext" class="vc-browse-arrow" aria-label="Next">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <!-- Flip card -->
+        <div class="vc-card-scene">
+          <div class="vc-card" id="vcCard">
+            <div class="vc-card-face vc-card-front">
+              <span class="vc-card-lang">English</span>
+              <p class="vc-card-word" id="vcCardEn"></p>
+            </div>
+            <div class="vc-card-face vc-card-back">
+              <span class="vc-card-lang">Russian</span>
+              <p class="vc-card-word" id="vcCardRu"></p>
+              <p class="vc-card-sentence" id="vcCardSentence"></p>
+              <button class="vc-icon-btn vc-browse-speak-btn" id="vcBrowseSpeakBtn" aria-label="Play audio" title="Play Russian">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flip hint -->
+        <p class="vc-flip-hint">Tap card to flip</p>
+
+        <!-- Mark buttons -->
+        <div class="vc-browse-marks">
+          <button id="vcMarkReview" class="vc-mark-btn vc-mark-btn--review">↩ Review</button>
+          <button id="vcMarkKnown" class="vc-mark-btn vc-mark-btn--known">✓ Known</button>
+        </div>
+
+        <!-- Browse footer -->
+        <div class="vc-browse-footer">
+          <button id="vcBrowseEndBtn" class="vc-home-link" style="border:none;background:none;cursor:pointer;">← Back</button>
+        </div>
+
+      </div><!-- /vcBrowse -->
+
     </main>
   </div>
-  <script src="js/app.js"></script>
+
+  <script src="js/vocabulary.js"></script>
 </body>
 </html>
