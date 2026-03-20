@@ -10,7 +10,7 @@ Generate a reading passage on the given topic, followed by five comprehension qu
 Format your response EXACTLY as follows — do not deviate, add no extra text:
 
 ---PASSAGE---
-[Russian prose, 400–550 words. Journalistic or analytical register. No title. No sub-headings. Single continuous prose with natural paragraph breaks.]
+[Russian prose, 2–3 paragraphs, 150–220 words total. Journalistic or analytical register. No title. No sub-headings.]
 ---QUESTIONS---
 1. [Comprehension question in English]
 2. [Comprehension question in English]
