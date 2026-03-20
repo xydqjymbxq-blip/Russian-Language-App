@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e0d0c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/grammar.css" />
+  <link rel="stylesheet" href="css/drills.css" />
+  <title>Grammar Drills — Russian</title>
+</head>
+<body>
+  <div class="app-shell">
+
+    <header class="header">
+      <div class="header-inner">
+        <a href="index.html" class="logo" aria-label="Back to home">
+          <span class="logo-letter">Я</span>
+          <span class="logo-text">Russian</span>
+        </a>
+        <button id="drResetBtn" class="gr-reset-btn" title="Start a new drill">↺ New drill</button>
+      </div>
+    </header>
+
+    <main class="main gr-main">
+
+      <!-- ── Welcome ── -->
+      <div id="drWelcome" class="gr-welcome">
+        <div class="gr-welcome-inner">
+          <i class="gr-welcome-icon">Д</i>
+          <h1 class="gr-welcome-title">Grammar Drills</h1>
+          <p class="gr-welcome-desc">
+            10 quick exercises on a single grammar point.
+            Pick a level and topic to begin.
+          </p>
+
+          <!-- Level selector -->
+          <div class="dr-levels" role="group" aria-label="Select level">
+            <button class="dr-level-btn" data-level="B1">B1</button>
+            <button class="dr-level-btn dr-level-btn--active" data-level="B2">B2</button>
+            <button class="dr-level-btn" data-level="C1">C1</button>
+            <button class="dr-level-btn" data-level="C2">C2</button>
+          </div>
+
+          <!-- Topic suggestions -->
+          <p class="gr-topics-label">Pick a topic</p>
+          <div id="drTopics" class="gr-topics"></div>
+          <button id="drShuffleBtn" class="dr-shuffle-btn">↻ New suggestions</button>
+        </div>
+      </div>
+
+      <!-- ── Drill ── -->
+      <div id="drDrill" class="gr-chat" hidden>
+
+        <!-- Progress -->
+        <div class="dr-progress-row">
+          <div class="dr-progress-bar">
+            <div id="drProgressFill" class="dr-progress-fill"></div>
+          </div>
+          <span id="drProgressText" class="dr-progress-text">Question 0 / 10</span>
+        </div>
+
+        <div id="drMessages" class="gr-messages" aria-live="polite" aria-label="Drill conversation"></div>
+
+        <!-- Input bar -->
+        <div id="drInputBar" class="gr-input-bar">
+          <a href="index.html" class="gr-home-btn" aria-label="Back to home" title="Back to home">←</a>
+          <textarea
+            id="drInput"
+            class="gr-textarea"
+            placeholder="Type your answer…"
+            rows="1"
+            disabled
+            aria-label="Your answer"
+          ></textarea>
+          <button id="drSend" class="gr-send-btn" disabled aria-label="Send">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Complete bar (shown after 10 answers) -->
+        <div id="drCompleteBar" class="dr-complete-bar" hidden>
+          <button id="drNewDrillBtn" class="dr-complete-btn dr-complete-btn--primary">↺ New drill</button>
+          <a href="index.html" class="dr-complete-btn dr-complete-btn--ghost">← Home</a>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="js/drills.js"></script>
+</body>
+</html>
