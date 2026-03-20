@@ -91,7 +91,10 @@ async function callApi(userText, showInUi) {
   } catch (err) {
     loadingEl.remove();
     conversationHistory.pop(); // remove the failed user turn
-    appendMessage('error', `Could not reach the server. Please check your connection and try again.`);
+    const msg = err.message && err.message !== '[object Object]'
+      ? `Error: ${err.message}`
+      : 'Could not reach the server. Please check your connection and try again.';
+    appendMessage('error', msg);
     console.error('Grammar API error:', err);
   }
 
