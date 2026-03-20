@@ -51,7 +51,10 @@
               Translation, transformation &amp; error correction
             </div>
           </div>
-          <button id="grStartBtn" class="gr-start-btn">Begin session →</button>
+          <p class="gr-topics-label">Suggested topics</p>
+          <div id="grTopics" class="gr-topics"></div>
+          <div class="gr-divider">or</div>
+          <button id="grStartBtn" class="gr-start-btn gr-start-btn--ghost">General session →</button>
         </div>
       </div>
 
@@ -61,6 +64,7 @@
         <div id="grMessages" class="gr-messages" aria-live="polite" aria-label="Conversation"></div>
 
         <div class="gr-input-bar">
+          <a href="index.html" class="gr-home-btn" aria-label="Back to home" title="Back to home">←</a>
           <textarea
             id="grInput"
             class="gr-textarea"

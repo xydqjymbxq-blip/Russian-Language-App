@@ -299,6 +299,23 @@
   text-align: center;
 }
 
+/* ── Home link (during session) ──────────────────────────────── */
+.fc-home-link {
+  font-size: 12px;
+  color: var(--color-text-faint);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-strong);
+  transition: color 0.15s, border-color 0.15s;
+  margin-top: 4px;
+}
+
+.fc-home-link:hover {
+  color: var(--color-text-muted);
+  border-color: var(--color-text-faint);
+}
+
 /* ── Reduced motion ──────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .fc-card-inner { transition: none; }

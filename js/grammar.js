@@ -12,15 +12,53 @@ let isWaiting = false;
 
 const $ = id => document.getElementById(id);
 
-// ── Start session ──────────────────────────────────────────────
-$('grStartBtn').addEventListener('click', startSession);
+// ── Grammar topics ─────────────────────────────────────────────
+const GRAMMAR_TOPICS = [
+  'Verbal aspect — perfective vs imperfective',
+  'Participles and participial phrases',
+  'Gerunds and gerundial constructions',
+  'Subordinate clauses and conjunctions',
+  'Prefixed verbs of motion',
+  'Unprefixed verbs of motion',
+  'Impersonal constructions',
+  'Modality and necessity',
+  'Word order for emphasis and pragmatics',
+  'Case government and alternations',
+  'Concessive constructions',
+  'Conditional and hypothetical mood',
+  'Short-form adjectives and predicates',
+  'Reflexive constructions',
+  'Double negation and negative concord',
+];
 
-async function startSession() {
+function renderTopics() {
+  const shuffled = [...GRAMMAR_TOPICS].sort(() => Math.random() - 0.5);
+  const topics = shuffled.slice(0, 3);
+  const container = $('grTopics');
+  container.innerHTML = '';
+  topics.forEach(topic => {
+    const btn = document.createElement('button');
+    btn.className = 'gr-topic-btn';
+    btn.textContent = topic;
+    btn.addEventListener('click', () => startSession(topic));
+    container.appendChild(btn);
+  });
+}
+
+renderTopics();
+
+// ── Start session ──────────────────────────────────────────────
+$('grStartBtn').addEventListener('click', () => startSession());
+
+async function startSession(topic = null) {
   $('grWelcome').hidden = true;
   $('grChat').hidden = false;
+  const opener = topic
+    ? `Begin the session. Focus on: ${topic}.`
+    : 'Begin the session.';
   // Send a hidden opener — not shown in the UI — to trigger
   // Claude's introduction and first exercise immediately.
-  await callApi('Begin the session.', false);
+  await callApi(opener, false);
 }
 
 // ── Send ───────────────────────────────────────────────────────
@@ -56,6 +94,7 @@ $('grResetBtn').addEventListener('click', () => {
   if (!confirm('Start a new session? The current conversation will be cleared.')) return;
   conversationHistory = [];
   $('grMessages').innerHTML = '';
+  renderTopics();
   $('grWelcome').hidden = false;
   $('grChat').hidden = true;
   setInputEnabled(false);

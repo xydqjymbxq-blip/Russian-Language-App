@@ -85,6 +85,63 @@
   flex-shrink: 0;
 }
 
+/* ── Topic suggestions ───────────────────────────────────────── */
+.gr-topics-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  align-self: flex-start;
+  margin-bottom: -4px;
+}
+
+.gr-topics {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.gr-topic-btn {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-dim);
+  border: 1px solid var(--color-accent-muted);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.gr-topic-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+  background: rgba(196,145,90,0.18);
+}
+
+.gr-topic-btn:active { opacity: 0.8; }
+
+.gr-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  color: var(--color-text-faint);
+  font-size: 12px;
+}
+
+.gr-divider::before,
+.gr-divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--color-border-strong);
+}
+
+/* ── Start button variants ───────────────────────────────────── */
 .gr-start-btn {
   width: 100%;
   padding: 13px 24px;
@@ -101,6 +158,14 @@
 
 .gr-start-btn:hover { opacity: 0.88; }
 .gr-start-btn:active { opacity: 0.75; }
+
+.gr-start-btn--ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border-strong);
+}
+
+.gr-start-btn--ghost:hover { color: var(--color-text); border-color: var(--color-text-faint); opacity: 1; }
 
 /* ── Chat container ──────────────────────────────────────────── */
 .gr-chat {
@@ -282,6 +347,30 @@
 .gr-send-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+/* ── Home button in input bar ────────────────────────────────── */
+.gr-home-btn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-faint);
+  font-size: 16px;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.gr-home-btn:hover {
+  color: var(--color-text-muted);
+  border-color: var(--color-text-faint);
+  background: var(--color-surface-2);
 }
 
 /* ── Header reset button ─────────────────────────────────────── */
