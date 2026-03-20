@@ -1,0 +1,281 @@
+/* ============================================================
+   Listening — audio player styles
+   Question/footer/meta styles inherited from reading.css
+   ============================================================ */
+
+/* ── Player wrapper ──────────────────────────────────────────── */
+.ls-player {
+  padding: 0 20px;
+}
+
+/* ── No-voice warning ────────────────────────────────────────── */
+.ls-no-voice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(196,164,90,0.08);
+  border: 1px solid rgba(196,164,90,0.22);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: #c4a45a;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.ls-no-voice-icon {
+  flex-shrink: 0;
+  font-style: normal;
+}
+
+/* ── Audio card ──────────────────────────────────────────────── */
+.ls-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+
+/* ── Mode toggle row ─────────────────────────────────────────── */
+.ls-mode-row {
+  display: flex;
+  gap: 6px;
+}
+
+.ls-mode-btn {
+  flex: 1;
+  padding: 7px 0;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-faint);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ls-mode-btn:hover { color: var(--color-text-muted); }
+
+.ls-mode-btn--active {
+  background: var(--color-accent-dim);
+  border-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+/* ── Full passage controls ───────────────────────────────────── */
+.ls-full-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ls-play-btn {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.ls-play-btn:hover  { opacity: 0.88; }
+.ls-play-btn:active { transform: scale(0.94); }
+
+.ls-progress-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ls-progress-bar {
+  width: 100%;
+  height: 3px;
+  background: var(--color-surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ls-progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 3px;
+  transition: width 0.3s linear;
+  width: 0%;
+}
+
+.ls-time {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--color-text-faint);
+  align-self: flex-end;
+}
+
+/* ── Chunk controls ──────────────────────────────────────────── */
+.ls-chunk-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ls-chunk-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ls-chunk-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.ls-chunk-status {
+  font-size: 11px;
+  color: var(--color-text-faint);
+  font-style: italic;
+}
+
+.ls-chunk-btns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ls-chunk-nav {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  color: var(--color-text-faint);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.ls-chunk-nav:hover:not(:disabled) { color: var(--color-text-muted); border-color: var(--color-text-faint); }
+.ls-chunk-nav:disabled              { opacity: 0.3; cursor: not-allowed; }
+
+.ls-chunk-play-btn {
+  flex: 1;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: opacity 0.15s;
+}
+
+.ls-chunk-play-btn:hover { opacity: 0.88; }
+
+/* ── Speed row ───────────────────────────────────────────────── */
+.ls-speed-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ls-speed-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  flex-shrink: 0;
+}
+
+.ls-speed-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.ls-speed-btn {
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-faint);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ls-speed-btn:hover { color: var(--color-text-muted); }
+
+.ls-speed-btn--active {
+  background: var(--color-accent-dim);
+  border-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+/* ── Transcript ──────────────────────────────────────────────── */
+.ls-transcript-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-faint);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.ls-transcript-toggle:hover { color: var(--color-text-muted); }
+
+.ls-transcript-toggle--open .rd-qs-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.ls-transcript {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 8px;
+}
+
+.ls-transcript p {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--color-text);
+  margin-bottom: 1em;
+}
+
+.ls-transcript p:last-child { margin-bottom: 0; }
+
+/* ── Reduced motion ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .ls-progress-fill { transition: none; }
+  .ls-play-btn      { transition: none; }
+}
