@@ -21,6 +21,7 @@ let checked          = false;
 
 // ── Topics ─────────────────────────────────────────────────────
 const READING_TOPICS = [
+  // Existing topics
   'Climate change and international policy',
   'Artificial intelligence and the future of work',
   'Global migration and refugee crises',
@@ -41,6 +42,17 @@ const READING_TOPICS = [
   'Demographic change and ageing societies',
   'Sports diplomacy and national identity',
   'Disinformation and information warfare',
+  // User-requested additions
+  'Immigration policy and border control',
+  'Social welfare systems and state support',
+  'Healthcare access and medical reform',
+  'Military service, conscription, and the draft',
+  'Taxation policy and fiscal reform',
+  // Additional topics
+  'Judicial independence and the rule of law',
+  'Housing affordability and homelessness',
+  'Drug policy and legalisation debates',
+  'Religious freedom and secularism in public life',
 ];
 
 function renderTopics() {
