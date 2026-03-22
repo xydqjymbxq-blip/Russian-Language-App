@@ -45,7 +45,10 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid request body' }) };
   }
 
-  const feedText = items
+  // Cap at 25 items — enough variety to pick 5 good stories, keeps the prompt short
+  const capped = items.slice(0, 25);
+
+  const feedText = capped
     .map((item, i) =>
       `[${i + 1}] Source: ${item.source}\nTitle: ${item.title}${item.description ? `\nSummary: ${item.description}` : ''}`
     )
@@ -60,8 +63,8 @@ exports.handler = async (event) => {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-6',
-        max_tokens: 2048,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4096,
         system: SYSTEM_PROMPT,
         messages: [
           {

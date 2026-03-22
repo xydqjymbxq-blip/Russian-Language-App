@@ -35,7 +35,7 @@ function parseItems(xml, sourceName) {
   const items = [];
   const itemRe = /<item[\s>]([\s\S]*?)<\/item>/gi;
   let match;
-  while ((match = itemRe.exec(xml)) !== null && items.length < 12) {
+  while ((match = itemRe.exec(xml)) !== null && items.length < 6) {
     const block = match[1];
     const title = extractText(block, 'title');
     let description = extractText(block, 'description');
