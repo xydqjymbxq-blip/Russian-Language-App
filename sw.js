@@ -1,4 +1,4 @@
-const CACHE_NAME = 'russian-app-v4';
+const CACHE_NAME = 'russian-app-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

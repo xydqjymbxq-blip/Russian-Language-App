@@ -1,7 +1,6 @@
 'use strict';
 
-const RSS_API      = '/.netlify/functions/rss-fetch';
-const SUMMARY_API  = '/.netlify/functions/news-summary';
+const NEWS_API = '/.netlify/functions/news-get';
 const CACHE_PREFIX = 'nw_stories_';
 
 const $ = id => document.getElementById(id);
@@ -32,23 +31,12 @@ function saveToCache(stories) {
   }
 }
 
-// ── API calls ─────────────────────────────────────────────────
-async function fetchRSSItems() {
-  const res = await fetch(RSS_API);
-  if (!res.ok) throw new Error('RSS fetch failed');
-  const { items } = await res.json();
-  return items;
-}
-
-async function generateSummaries(items) {
-  const res = await fetch(SUMMARY_API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items }),
-  });
+// ── API call ──────────────────────────────────────────────────
+async function fetchStories() {
+  const res = await fetch(NEWS_API);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Summary generation failed');
+    throw new Error(err.error || 'Failed to load stories');
   }
   const { stories } = await res.json();
   return stories;
@@ -220,8 +208,7 @@ async function loadStories(bypassCache = false) {
   setRefreshSpinning(true);
 
   try {
-    const items = await fetchRSSItems();
-    const stories = await generateSummaries(items);
+    const stories = await fetchStories();
     saveToCache(stories);
     renderFeed(stories);
     showScreen('nwCards');
