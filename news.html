@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Daily Russian-language reading practice from real news sources" />
+  <meta name="theme-color" content="#0e0d0c" />
+
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/news.css" />
+
+  <title>News — Russian Language App</title>
+</head>
+<body>
+  <div class="nw-shell">
+
+    <!-- Header -->
+    <header class="nw-header">
+      <div class="nw-header-inner">
+        <a href="index.html" class="nw-back-btn" aria-label="Back to home">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </a>
+        <span class="nw-header-title">Новости</span>
+        <button class="nw-refresh-btn" id="nwRefreshBtn" aria-label="Refresh stories">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="nw-main">
+
+      <!-- Loading state -->
+      <div id="nwLoading" class="nw-loading">
+        <div class="nw-spinner" aria-hidden="true"></div>
+        <p class="nw-loading-text">Fetching today's stories…</p>
+        <p class="nw-loading-sub">Generating Russian summaries with AI — this takes a few seconds</p>
+      </div>
+
+      <!-- Error state -->
+      <div id="nwError" class="nw-error" hidden>
+        <div class="nw-error-icon" aria-hidden="true">⚠</div>
+        <p class="nw-error-text" id="nwErrorText">Failed to load stories. Check your connection and try again.</p>
+        <button class="nw-retry-btn" id="nwRetryBtn">Try again</button>
+      </div>
+
+      <!-- Story cards -->
+      <div id="nwCards" hidden>
+        <div class="nw-feed">
+          <div class="nw-date-bar">
+            <span class="nw-date-label" id="nwDateLabel"></span>
+            <span class="nw-story-count" id="nwStoryCount"></span>
+          </div>
+          <!-- Cards injected by JS -->
+          <div id="nwCardsList"></div>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="js/news.js"></script>
+</body>
+</html>
